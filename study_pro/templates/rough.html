@@ -1,0 +1,53 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Study Rough Page</title>
+  <link rel="stylesheet" href="{% static 'css/rough.css' %}">
+  <script src="{% static 'js/rough.js' %}" defer></script>
+</head>
+
+<body>
+  <main class="rough-page">
+    <a class="back-link" href="/">← Back to Home</a>
+
+    <header class="rough-header">
+      <div>
+        <p class="eyebrow">THINK IT THROUGH</p>
+        <h1>Rough Page</h1>
+        <p class="subtitle">Work out ideas, sums, and quick thoughts here.</p>
+      </div>
+      <span class="rough-icon" aria-hidden="true">✏️</span>
+    </header>
+
+    <section class="paper-card">
+      <div class="paper-toolbar">
+        <span class="save-status" id="save-status">Ready</span>
+
+        <div class="toolbar-actions">
+          <button type="button" id="download-button" class="secondary-button">
+            Download
+          </button>
+          <button type="button" id="clear-button" class="clear-button">
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <label class="visually-hidden" for="rough-text">Rough notes</label>
+      <textarea
+        id="rough-text"
+        placeholder="Start writing or working something out..."
+        spellcheck="true"
+      ></textarea>
+
+      <div class="paper-footer">
+        <span>Saved automatically in this browser</span>
+        <span><strong id="word-count">0</strong> words</span>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

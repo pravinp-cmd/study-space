@@ -1,0 +1,459 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Study Space</title>
+
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <script src="{% static 'js/home.js' %}" defer></script>
+
+  <style>
+    .bg-animation {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .bg-animation .orb {
+      position: absolute;
+      display: block;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      filter: blur(45px);
+      opacity: 0.55;
+    }
+
+    .bg-animation .orb-one {
+      top: 5%;
+      left: 3%;
+      background: #899aff;
+      animation: move-one 8s ease-in-out infinite alternate;
+    }
+
+    .bg-animation .orb-two {
+      top: 25%;
+      right: 5%;
+      background: #c58bff;
+      animation: move-two 10s ease-in-out infinite alternate;
+    }
+
+    .bg-animation .orb-three {
+      bottom: 0;
+      left: 38%;
+      background: #75d8e8;
+      animation: move-three 12s ease-in-out infinite alternate;
+    }
+
+    .page-wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes move-one {
+      to { transform: translate(150px, 100px) scale(1.2); }
+    }
+
+    @keyframes move-two {
+      to { transform: translate(-140px, 120px) scale(0.8); }
+    }
+
+    @keyframes move-three {
+      to { transform: translate(100px, -120px) scale(1.2); }
+    }
+
+    @media (max-width: 600px) {
+      .bg-animation .orb {
+        width: 220px;
+        height: 220px;
+        filter: blur(35px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bg-animation .orb {
+        animation: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-animation" aria-hidden="true">
+    <span class="orb orb-one"></span>
+    <span class="orb orb-two"></span>
+    <span class="orb orb-three"></span>
+  </div>
+
+  <main class="page-wrap">
+
+    <header class="hero animate-in">
+      <div class="hero-copy">
+        <p class="eyebrow">YOUR STUDY SPACE</p>
+        <h1>Study Time Table</h1>
+        <p class="hero-subtitle">Plan your day. Make every session count.</p>
+      </div>
+
+      <div class="hero-user">
+        <span class="hero-icon" aria-hidden="true">📚</span>
+
+        {% if user.is_authenticated %}
+          <span class="user-name">{{ user.username }}</span>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="auth-button" type="submit">Logout</button>
+          </form>
+        {% else %}
+          <a class="auth-button" href="{% url 'login' %}">Login</a>
+        {% endif %}
+      </div>
+
+      <a href="{% url 'signup' %}">Create account</a>
+      
+    </header>
+
+    <nav class="dashboard-nav animate-in" aria-label="Main navigation">
+      <a class="nav-link active" href="/">🏠 <span>Home</span></a>
+      <a class="nav-link" href="/profile/">👤 <span>Profile</span></a>
+      <a class="nav-link" href="/calculator/">🧮 <span>Calculator</span></a>
+      <a class="nav-link" href="/calendar/">📅 <span>Calendar</span></a>
+      <a class="nav-link" href="/notes/">📝 <span>Notes</span></a>
+      <a class="nav-link" href="/rough/">✏️ <span>Rough Page</span></a>
+    </nav>
+
+    {% if messages %}
+      <section class="messages" aria-live="polite">
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    <section class="stats-grid">
+      <article class="stat-card animate-in">
+        <span class="stat-icon">⏱️</span>
+        <span class="stat-label">Planned this week</span>
+        <strong>{{ total_hours|floatformat:1 }} hours</strong>
+      </article>
+
+      <article class="stat-card animate-in">
+        <span class="stat-icon">📖</span>
+        <span class="stat-label">Study sessions</span>
+        <strong>{{ session_count }}</strong>
+      </article>
+
+      <article class="stat-card animate-in">
+        <span class="stat-icon">🎯</span>
+        <span class="stat-label">Subjects</span>
+        <strong>{{ subject_count }}</strong>
+      </article>
+    </section>
+
+    <section class="main-grid">
+
+      <article class="panel animate-in">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">MAKE A PLAN</p>
+            <h2>Add a study session</h2>
+          </div>
+          <span class="heading-icon">＋</span>
+        </div>
+
+        <form method="post" action="{% url 'add_session' %}" class="form-stack">
+          {% csrf_token %}
+
+          <label for="day">Day</label>
+          <select id="day" name="day" required>
+            {% for number, name in days %}
+              <option value="{{ number }}"
+                {% if number == active_day %}selected{% endif %}>
+                {{ name }}
+              </option>
+            {% endfor %}
+          </select>
+
+          <label for="subject">Subject</label>
+          <input
+            id="subject"
+            name="subject"
+            maxlength="50"
+            placeholder="Example: Mathematics"
+            required
+          >
+
+          <label for="topic">Topic or task</label>
+          <input
+            id="topic"
+            name="topic"
+            maxlength="100"
+            placeholder="Example: Algebra practice"
+            required
+          >
+
+          <div class="time-fields">
+            <div>
+              <label for="start-time">Start time</label>
+              <input id="start-time" type="time" name="start_time" required>
+            </div>
+            <div>
+              <label for="end-time">End time</label>
+              <input id="end-time" type="time" name="end_time" required>
+            </div>
+          </div>
+
+          <button class="button button-primary" type="submit">
+            Add to timetable
+          </button>
+        </form>
+      </article>
+
+      <article class="panel timetable-panel animate-in">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">YOUR WEEK</p>
+            <h2>Study timetable</h2>
+          </div>
+          <span class="heading-icon">🗓️</span>
+        </div>
+
+        <nav class="day-tabs" aria-label="Choose a day">
+          {% for number, name in days %}
+            <a
+              class="day-tab {% if number == active_day %}selected{% endif %}"
+              href="?day={{ number }}"
+            >
+              {{ name|slice:":3" }}
+            </a>
+          {% endfor %}
+        </nav>
+
+        <h3 class="selected-day">{{ active_day_name }}</h3>
+
+        <div class="session-list">
+          {% for item in sessions %}
+            <div class="session-row {% if item.completed %}completed{% endif %}">
+              <div class="session-time">
+                {{ item.start_time|time:"g:i A" }}
+                <span>to</span>
+                {{ item.end_time|time:"g:i A" }}
+              </div>
+
+              <div class="session-info">
+                <strong class="session-subject">{{ item.subject }}</strong>
+                <span>{{ item.topic }}</span>
+              </div>
+
+              <div class="session-actions">
+                <form method="post" action="{% url 'toggle_session' item.id %}">
+                  {% csrf_token %}
+                  <button
+                    class="icon-button done-button"
+                    type="submit"
+                    title="Toggle completed"
+                  >
+                    {% if item.completed %}✓{% else %}○{% endif %}
+                  </button>
+                </form>
+
+                <form method="post" action="{% url 'delete_session' item.id %}">
+                  {% csrf_token %}
+                  <button
+                    class="icon-button delete-button"
+                    type="submit"
+                    title="Delete session"
+                  >
+                    ×
+                  </button>
+                </form>
+              </div>
+            </div>
+          {% empty %}
+            <div class="empty-state">
+              <span>🌱</span>
+              <p>No sessions planned for this day yet.</p>
+              <small>Add one using the form.</small>
+            </div>
+          {% endfor %}
+        </div>
+      </article>
+    </section>
+
+    <section class="panel graph-panel animate-in">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">YOUR PROGRESS</p>
+          <h2>Study minutes by day</h2>
+        </div>
+        <span class="heading-icon">📊</span>
+      </div>
+
+      <div class="weekly-graph">
+        {% for item in per_day %}
+          <div class="graph-day">
+            <span class="graph-value">
+              {{ item.completed_minutes }} / {{ item.planned_minutes }} min
+            </span>
+
+            <div class="bar-area">
+              <div
+                class="bar planned"
+                data-height="{{ item.planned_pct }}"
+                title="Planned: {{ item.planned_minutes }} minutes">
+              </div>
+              <div
+                class="bar completed"
+                data-height="{{ item.completed_pct }}"
+                title="Completed: {{ item.completed_minutes }} minutes">
+              </div>
+            </div>
+
+            <span class="graph-day-name">{{ item.name|slice:":3" }}</span>
+          </div>
+        {% endfor %}
+      </div>
+
+      <p class="graph-legend">
+        <span><i class="legend-dot planned-dot"></i> Planned</span>
+        <span><i class="legend-dot completed-dot"></i> Completed</span>
+      </p>
+    </section>
+
+    <section class="bottom-grid">
+
+      <article class="panel animate-in">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">ABOUT YOU</p>
+            <h2>Student profile</h2>
+          </div>
+          <span class="heading-icon">👤</span>
+        </div>
+
+        <form method="post" action="{% url 'save_profile' %}" class="form-stack">
+          {% csrf_token %}
+
+          <label for="profile-name">Name</label>
+          <input
+            id="profile-name"
+            name="name"
+            maxlength="60"
+            value="{{ profile.name }}"
+            placeholder="Your name"
+          >
+
+          <label for="profile-grade">Class or grade</label>
+          <input
+            id="profile-grade"
+            name="grade"
+            maxlength="40"
+            value="{{ profile.grade }}"
+            placeholder="Example: Grade 10"
+          >
+
+          <button class="button button-secondary" type="submit">
+            Save profile
+          </button>
+        </form>
+      </article>
+
+      <article class="panel animate-in">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">STAY ON TRACK</p>
+            <h2>Study reminders</h2>
+          </div>
+          <span class="heading-icon">⏰</span>
+        </div>
+
+        <form method="post" action="{% url 'add_alarm' %}" class="alarm-form">
+          {% csrf_token %}
+          <input type="time" name="time" aria-label="Reminder time" required>
+          <input name="label" placeholder="Reminder name" aria-label="Reminder name">
+          <button class="button button-primary" type="submit">Add</button>
+        </form>
+
+        <div class="alarm-list">
+          {% for alarm in alarms %}
+            <div class="alarm-row">
+              <form method="post" action="{% url 'toggle_alarm' alarm.id %}">
+                {% csrf_token %}
+                <button class="status-button" type="submit">
+                  {% if alarm.enabled %}On{% else %}Off{% endif %}
+                </button>
+              </form>
+
+              <span class="alarm-label">
+                <strong>{{ alarm.time|time:"g:i A" }}</strong>
+                {{ alarm.label }}
+              </span>
+
+              <form method="post" action="{% url 'delete_alarm' alarm.id %}">
+                {% csrf_token %}
+                <button
+                  class="icon-button delete-button"
+                  type="submit"
+                  title="Delete reminder"
+                >
+                  ×
+                </button>
+              </form>
+            </div>
+          {% empty %}
+            <div class="empty-inline">No reminders set yet.</div>
+          {% endfor %}
+        </div>
+
+        <p class="helper-text">Reminder sound works while this page is open.</p>
+      </article>
+
+      <article class="panel animate-in">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">DAILY CHECK-IN</p>
+            <h2>Rate your study day</h2>
+          </div>
+          <span class="heading-icon">⭐</span>
+        </div>
+
+        <form method="post" action="{% url 'rate_day' %}" class="rating-form">
+          {% csrf_token %}
+
+          <div class="star-options">
+            {% for n in "12345" %}
+              <label class="star-option">
+                <input type="radio" name="stars" value="{{ n }}" required>
+                <span>{{ n }}★</span>
+              </label>
+            {% endfor %}
+          </div>
+
+          {% if today_rating %}
+            <p class="rating-result">
+              Today's rating: {{ today_rating }} out of 5
+            </p>
+          {% else %}
+            <p class="helper-text">How did your study session go today?</p>
+          {% endif %}
+
+          <button class="button button-secondary" type="submit">
+            Save today's rating
+          </button>
+        </form>
+      </article>
+
+    </section>
+
+    <footer class="page-footer">
+      Keep showing up. Small study sessions add up. ✨
+    </footer>
+
+  </main>
+
+  {{ alarm_data|json_script:"alarm-data" }}
+</body>
+</html>

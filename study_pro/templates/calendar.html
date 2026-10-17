@@ -1,0 +1,75 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Study Calendar</title>
+  <link rel="stylesheet" href="{% static 'css/calendar.css' %}">
+</head>
+
+<body>
+  <main class="calendar-page">
+    <a class="back-link" href="/">← Back to Home</a>
+
+    <section class="calendar-card">
+      <header class="calendar-header">
+        <div>
+          <p class="eyebrow">YOUR STUDY PLAN</p>
+          <h1>{{ month_name }} {{ year }}</h1>
+          <p class="subtitle">Your weekly sessions, shown on the calendar.</p>
+        </div>
+
+        <nav class="month-nav" aria-label="Change month">
+          <a href="?year={{ previous_year }}&month={{ previous_month }}"
+             aria-label="Previous month">‹</a>
+          <a href="?year={{ next_year }}&month={{ next_month }}"
+             aria-label="Next month">›</a>
+        </nav>
+      </header>
+
+      <div class="calendar-grid">
+        <div class="weekday">Mon</div>
+        <div class="weekday">Tue</div>
+        <div class="weekday">Wed</div>
+        <div class="weekday">Thu</div>
+        <div class="weekday">Fri</div>
+        <div class="weekday">Sat</div>
+        <div class="weekday">Sun</div>
+
+        {% for week in weeks %}
+          {% for cell in week %}
+            <article class="calendar-day
+              {% if not cell.in_month %}outside-month{% endif %}
+              {% if cell.is_today %}today{% endif %}">
+
+              <span class="date-number">{{ cell.date|date:"j" }}</span>
+
+              {% if cell.in_month %}
+                <div class="day-sessions">
+                  {% for session in cell.sessions|slice:":2" %}
+                    <div class="session-chip" title="{{ session.subject }}: {{ session.topic }}">
+                      <span>{{ session.start_time|time:"g:i A" }}</span>
+                      <strong>{{ session.subject }}</strong>
+                    </div>
+                  {% endfor %}
+
+                  {% if cell.sessions|length > 2 %}
+                    <small class="more-sessions">
+                      +{{ cell.sessions|length|add:"-2" }} more
+                    </small>
+                  {% endif %}
+                </div>
+              {% endif %}
+            </article>
+          {% endfor %}
+        {% endfor %}
+      </div>
+
+      <p class="calendar-note">
+        Calendar sessions repeat on their selected weekday from your timetable.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

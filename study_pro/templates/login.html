@@ -1,0 +1,48 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login — Study Space</title>
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+
+<body>
+  <main class="login-page">
+    <a class="back-link" href="/">← Back to Home</a>
+
+    <section class="login-card">
+      <div class="login-icon">📚</div>
+      <p class="eyebrow">WELCOME BACK</p>
+      <h1>Login</h1>
+      <p class="subtitle">Sign in to your Study Space.</p>
+
+      {% if form.errors %}
+        <p class="error-message">Username or password is incorrect.</p>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+
+        <label for="{{ form.username.id_for_label }}">Username</label>
+        {{ form.username }}
+
+        <label for="{{ form.password.id_for_label }}">Password</label>
+        {{ form.password }}
+
+        {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+
+        <button type="submit">Login</button>
+      </form>
+
+      <p class="signup-prompt">
+        Don't have an account?
+        <a href="{% url 'signup' %}">Create account</a>
+      </p>
+    </section>
+  </main>
+</body>
+</html>

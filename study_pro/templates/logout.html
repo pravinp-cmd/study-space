@@ -1,0 +1,23 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Logged Out — Study Space</title>
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+  <link rel="stylesheet" href="{% static 'css/logout.css' %}">
+</head>
+
+<body>
+  <main class="login-page">
+    <section class="login-card logout-card">
+      <div class="success-icon">✓</div>
+      <p class="eyebrow">SESSION ENDED</p>
+      <h1>Logged out</h1>
+      <p class="subtitle">You have safely logged out of Study Space.</p>
+      <a class="login-again" href="{% url 'login' %}">Login again</a>
+    </section>
+  </main>
+</body>
+</html>

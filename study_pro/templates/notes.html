@@ -1,0 +1,104 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Study Notes</title>
+  <link rel="stylesheet" href="{% static 'css/notes.css' %}">
+  <script src="{% static 'js/notes.js' %}" defer></script>
+</head>
+
+<body>
+  <main class="notes-page">
+    <a class="back-link" href="/">← Back to Home</a>
+
+    <header class="notes-header">
+      <div>
+        <p class="eyebrow">YOUR IDEAS, SAVED</p>
+        <h1>Study Notes</h1>
+        <p class="subtitle">Write down reminders, ideas, and things to revise.</p>
+      </div>
+      <span class="notes-icon" aria-hidden="true">📝</span>
+    </header>
+
+    {% if messages %}
+      <section class="messages" aria-live="polite">
+        {% for message in messages %}
+          <p class="message {{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    <section class="notes-layout">
+      <article class="note-panel">
+        <h2>Create a note</h2>
+
+        <form method="post" action="{% url 'notes_add' %}" id="note-form">
+          {% csrf_token %}
+
+          <label for="title">Title</label>
+          <input
+            id="title"
+            name="title"
+            maxlength="120"
+            placeholder="Example: Science revision"
+          >
+
+          <label for="content">Your note</label>
+          <textarea
+            id="content"
+            name="content"
+            rows="7"
+            maxlength="5000"
+            placeholder="Write your note here..."
+            required
+          ></textarea>
+
+          <div class="form-footer">
+            <small><span id="char-count">0</span> / 5000</small>
+            <button type="submit">Save note</button>
+          </div>
+        </form>
+      </article>
+
+      <section class="saved-notes">
+        <div class="saved-heading">
+          <h2>Saved notes</h2>
+          <span>{{ notes|length }} total</span>
+        </div>
+
+        {% for note in notes %}
+          <article class="note-card">
+            <div class="note-card-heading">
+              <div>
+                <h3>{{ note.title }}</h3>
+                <time>{{ note.updated_at|date:"M d, Y · g:i A" }}</time>
+              </div>
+
+              <form
+                method="post"
+                action="{% url 'notes_delete' note.id %}"
+                class="delete-form"
+              >
+                {% csrf_token %}
+                <button type="submit" class="delete-button" title="Delete note">
+                  ×
+                </button>
+              </form>
+            </div>
+
+            <p class="note-content">{{ note.content }}</p>
+          </article>
+        {% empty %}
+          <div class="empty-notes">
+            <span>🌱</span>
+            <p>No notes saved yet.</p>
+            <small>Your notes will appear here.</small>
+          </div>
+        {% endfor %}
+      </section>
+    </section>
+  </main>
+</body>
+</html>

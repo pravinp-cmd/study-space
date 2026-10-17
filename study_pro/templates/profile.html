@@ -1,0 +1,76 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Profile</title>
+  <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+</head>
+
+<body>
+  <main class="profile-page">
+    <a class="back-link" href="/">← Back to Home</a>
+
+    <section class="profile-card">
+      <div class="profile-banner"></div>
+
+      <div class="profile-content">
+        <div class="avatar">
+          {{ profile.name|first|upper|default:"S" }}
+        </div>
+
+        <p class="eyebrow">YOUR STUDY SPACE</p>
+        <h1>Student Profile</h1>
+        <p class="subtitle">Your details, all in one place.</p>
+
+        <div class="profile-summary">
+          <div class="summary-item">
+            <span class="summary-label">Name</span>
+            <strong>{{ profile.name|default:"Add your name" }}</strong>
+          </div>
+
+          <div class="summary-item">
+            <span class="summary-label">Class or grade</span>
+            <strong>{{ profile.grade|default:"Add your grade" }}</strong>
+          </div>
+        </div>
+
+        {% if messages %}
+          <div class="messages">
+            {% for message in messages %}
+              <p class="message {{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'save_profile' %}" class="profile-form">
+          {% csrf_token %}
+
+          <label for="name">Your name</label>
+          <input
+            id="name"
+            type="text"
+            name="name"
+            maxlength="60"
+            value="{{ profile.name }}"
+            placeholder="Enter your name"
+          >
+
+          <label for="grade">Class or grade</label>
+          <input
+            id="grade"
+            type="text"
+            name="grade"
+            maxlength="40"
+            value="{{ profile.grade }}"
+            placeholder="Example: Grade 10"
+          >
+
+          <button type="submit">Save profile</button>
+        </form>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
