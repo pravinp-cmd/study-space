@@ -141,4 +141,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 SECRET_KEY = os.environ["SECRET_KEY"]
-"PASSWORD": os.environ["DB_PASSWORD"],
+# "PASSWORD": os.environ["DB_PASSWORD"],
