@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
@@ -15,15 +16,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.environ["SECRET_KEY"]
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+# DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.getenv(
-        "ALLOWED_HOSTS", "localhost,127.0.0.1"
-    ).split(",")
-    if host.strip()
-]
+# ALLOWED_HOSTS = [
+#     host.strip()
+#     for host in os.getenv(
+#         "ALLOWED_HOSTS", "localhost,127.0.0.1"
+#     ).split(",")
+#     if host.strip()
+# ]
+
+
+DEBUG = "RENDER" not in os.environ
+
+ALLOWED_HOSTS = []
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -37,6 +46,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -64,16 +74,36 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "study_pro.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ["DB_NAME"],
-        "USER": os.environ["DB_USER"],
-        "PASSWORD": os.environ["DB_PASSWORD"],
-        "HOST": os.getenv("DB_HOST", "localhost"),
-        "PORT": os.getenv("DB_PORT", "5432"),
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": os.environ["DB_NAME"],
+#         "USER": os.environ["DB_USER"],
+#         "PASSWORD": os.environ["DB_PASSWORD"],
+#         "HOST": os.getenv("DB_HOST", "localhost"),
+#         "PORT": os.getenv("DB_PORT", "5432"),
+#     }
+# }
+
+
+if os.environ.get("DATABASE_URL"):
+    DATABASES = {
+        "default": dj_database_url.parse(
+            os.environ["DATABASE_URL"],
+            conn_max_age=600,
+        )
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ["DB_NAME"],
+            "USER": os.environ["DB_USER"],
+            "PASSWORD": os.environ["DB_PASSWORD"],
+            "HOST": os.environ["DB_HOST"],
+            "PORT": os.environ.get("DB_PORT", "5432"),
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -108,3 +138,7 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/login/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+SECRET_KEY = os.environ["SECRET_KEY"]
+"PASSWORD": os.environ["DB_PASSWORD"],
